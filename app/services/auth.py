@@ -1,0 +1,58 @@
+from datetime import datetime, timedelta
+from uuid import UUID
+
+from jose import jwt, JWTError
+from passlib.context import CryptContext
+from fastapi import HTTPException, status
+
+from app.config import get_settings
+from app.schemas.token import TokenData
+
+settings = get_settings()
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
+
+
+def _create_token(data: dict, expires_delta: timedelta) -> str:
+    payload = {**data, "exp": datetime.utcnow() + expires_delta}
+    return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
+
+
+def create_access_token(user_id: UUID) -> str:
+    return _create_token(
+        {"sub": str(user_id), "type": "access"},
+        timedelta(minutes=settings.access_token_expire_minutes),
+    )
+
+
+def create_refresh_token(user_id: UUID) -> str:
+    return _create_token(
+        {"sub": str(user_id), "type": "refresh"},
+        timedelta(days=settings.refresh_token_expire_days),
+    )
+
+
+def decode_token(token: str, expected_type: str = "access") -> TokenData:
+    credentials_exc = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(
+            token, settings.secret_key, algorithms=[settings.algorithm]
+        )
+        sub: str = payload.get("sub")
+        token_type: str = payload.get("type", "access")
+        if sub is None or token_type != expected_type:
+            raise credentials_exc
+        return TokenData(sub=sub, type=token_type)
+    except JWTError:
+        raise credentials_exc
