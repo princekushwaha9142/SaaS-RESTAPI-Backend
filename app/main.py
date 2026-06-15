@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import get_settings
-from app.routers import auth, projects
+from app.routers import auth, projects, tasks
 
 settings = get_settings()
 
@@ -42,6 +42,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
+app.include_router(tasks.router, prefix="", tags=["Tasks"])
 
 @app.get("/health", tags=["Health"])
 async def health():
