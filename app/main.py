@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 
 from app.config import get_settings
 from app.routers import auth, projects, tasks
@@ -17,17 +18,33 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="TaskManager API",
     version="1.0.0",
-    description="SaaS Task & Project Management API",
+    description="Production-grade SaaS Task & Project Management API",
     lifespan=lifespan,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"] if not settings.is_production else ["https://yourdomain.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": "Validation error"},
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 
 @app.exception_handler(Exception)
@@ -44,6 +61,11 @@ app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
 app.include_router(tasks.router, prefix="", tags=["Tasks"])
 
+
 @app.get("/health", tags=["Health"])
 async def health():
-    return {"status": "ok", "version": "1.0.0"}
+    return {
+        "status": "ok",
+        "version": "1.0.0",
+        "environment": settings.environment,
+    }
