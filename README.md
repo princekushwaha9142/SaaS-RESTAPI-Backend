@@ -136,45 +136,84 @@ pytest -v
 SaaS-RESTAPI-Backend/
 
 ├── app/
+
 │   ├── main.py              # FastAPI app, CORS, error handlers
+
 │   ├── config.py            # Typed config via pydantic-settings
+
 │   ├── dependencies.py      # get_db(), get_current_user()
+
 │   ├── models/
+
 │   │   ├── base.py          # Async engine + session factory
+
 │   │   ├── user.py          # User ORM model
+
 │   │   ├── project.py       # Project + ProjectMember models
+
 │   │   └── task.py          # Task, Tag, Comment, task_tags (M2M)
+
 │   ├── schemas/
+
 │   │   ├── token.py         # Token, TokenData
+
 │   │   ├── user.py          # UserCreate, UserRead, UserUpdate
-│   │   ├── project.py       # Project + Member schema
+
+│   │   ├── project.py       # Project + Member schemas
+
 │   │   └── task.py          # Task + Comment + Filter schemas
+
 │   ├── services/
+
 │   │   ├── auth.py          # JWT create/decode, bcrypt hashing
+
 │   │   ├── user.py          # User DB operations
+
 │   │   ├── project.py       # Project CRUD + slug + membership
+
 │   │   └── task.py          # Task CRUD + filters + tags + comments
+
 │   └── routers/
+
 │       ├── auth.py          # POST /auth/register, login, refresh, me
+
 │       ├── projects.py      # /projects CRUD + members
+
 │       └── tasks.py         # /tasks CRUD + filters + comments
+
 ├── migrations/
+
 │   ├── env.py               # Async Alembic env
+
 │   └── versions/            # Auto-generated migration scripts
+
 ├── tests/
+
 │   ├── conftest.py          # SQLite fixtures + async HTTP client
+
 │   ├── test_auth.py         # 7 auth tests
+
 │   ├── test_projects.py     # 6 project tests
+
 │   └── test_tasks.py        # 7 task tests
+
 ├── .github/
+
 │   └── workflows/
+
 │       └── test.yml         # GitHub Actions CI pipeline
+
 ├── Dockerfile               # Multi-stage production build
+
 ├── docker-compose.yml       # API + PostgreSQL + Redis
+
 ├── alembic.ini
+
 ├── pytest.ini
+
 └── requirements.txt
-└── Readme.md
+
+└──README.md
 
 ---
 
