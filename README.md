@@ -1,52 +1,83 @@
-# SaaS-RESTAPI-Backend 
+# SaaS-RESTAPI-Backend 🚀
 
 ![CI](https://github.com/princekushwaha9142/SaaS-RESTAPI-Backend/actions/workflows/test.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?logo=fastapi)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)
 ![Tests](https://img.shields.io/badge/Tests-20%20passed-brightgreen?logo=pytest)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-> Production-grade **Task & Project Management REST API** — built with FastAPI, PostgreSQL (async), JWT auth, and Docker.
+> Production-grade **Task & Project Management REST API** — built with FastAPI, PostgreSQL (async), JWT auth, Redis, and Docker.
 
 🔗 **Live API:** [saas-restapi-backend-production.up.railway.app/docs](https://saas-restapi-backend-production.up.railway.app/docs)
+
 ---
 
-## Features
+## 🎯 Problem Statement
 
-### Authentication
+Most task management APIs are either too simple (no auth, no roles) or too complex to understand. This project bridges that gap — a production-grade backend with real-world patterns:
+
+- Async database layer for high performance
+- JWT with refresh tokens (not just basic auth)
+- Role-based access control on every endpoint
+- Rate limiting to prevent abuse
+- Automated tests with isolated test database
+- Fully containerized and deployed
+
+---
+
+## 📊 Metrics
+
+| Metric | Value |
+|--------|-------|
+| API Endpoints | 24 |
+| Automated Tests | 20 (100% pass) |
+| Database Tables | 8 |
+| Docker Services | 3 (API + PostgreSQL + Redis) |
+| Rate Limit | 5 requests/min on `/auth/login` |
+| Test Run Time | ~4 seconds |
+| Deployment | Live on Railway |
+
+---
+
+## ✨ Features
+
+### 🔐 Authentication
 - JWT access tokens (30 min expiry) + refresh tokens (7 days)
 - bcrypt password hashing
+- **Rate limiting** — 5 requests/minute on login (brute-force protection)
 - OAuth2 password flow compatible with Swagger UI
 - Protected routes via `Depends(get_current_user)`
 
-### Project Management
+### 📁 Project Management
 - Create projects with auto-generated unique slugs
 - Role-based membership — Owner / Admin / Member / Viewer
 - Add/remove members with ownership validation
 - Cascade deletes — project delete removes all tasks and members
 
-### Task Management
+### ✅ Task Management
 - Full CRUD with 6 status states: `backlog → todo → in_progress → in_review → done → cancelled`
 - 4 priority levels: `low / medium / high / urgent`
 - Many-to-many **Tags** — auto-created on first use, reused across tasks
 - **Assignee** support — assign tasks to project members
 - Due dates
 
-### Advanced Filtering
+### 🔍 Advanced Filtering
 - Filter tasks by `status`, `priority`, `assignee_id`
 - **Full-text search** on title + description (`ILIKE`)
 - Pagination with `skip` + `limit`
 
-### Threaded Comments
+### 💬 Threaded Comments
 - Add comments to any task
 - Reply to comments (parent-child threading via `parent_id`)
 
-### Testing
+### 🧪 Testing
 - 20 automated tests covering auth, projects, tasks
 - Isolated SQLite test database — no Docker needed to run tests
 - Session rollback between tests for clean state
+- Rate limiter disabled during tests automatically
 
 ### 🐳 Docker
 - Multi-stage Dockerfile (builder + slim final image)
@@ -64,13 +95,54 @@
 | ORM | SQLAlchemy 2.0 (async) |
 | Migrations | Alembic |
 | Auth | python-jose + passlib/bcrypt |
+| Cache | Redis 7 (Upstash) |
+| Rate Limiting | SlowAPI |
 | Testing | pytest + httpx + aiosqlite |
-| Deploy | Docker + docker-compose |
+| Containerization | Docker + docker-compose |
+| Hosted DB | Supabase (PostgreSQL) |
+| Hosted Cache | Upstash (Redis) |
+| Deploy | Railway |
 | CI/CD | GitHub Actions |
 
 ---
 
-## Quick Start
+## 🏛️ Design Decisions
+
+**Why FastAPI over Django/Flask?**
+FastAPI gives async support out of the box, automatic Swagger docs, and Pydantic validation — perfect for a production API with zero boilerplate.
+
+**Why async SQLAlchemy + asyncpg?**
+Blocking DB calls kill performance under load. Async SQLAlchemy + asyncpg gives non-blocking DB queries — the entire stack is async from HTTP to DB.
+
+**Why 4-layer architecture?**
+Routers only handle HTTP. Services handle business logic. Models handle DB. Schemas handle validation. Each layer is independently testable and replaceable.
+
+**Why separate access + refresh tokens?**
+Short-lived access tokens (30 min) limit exposure if stolen. Refresh tokens (7 days) let users stay logged in without re-entering credentials.
+
+**Why Redis + Rate Limiting?**
+Redis enables rate limiting on auth endpoints. Login is limited to 5 requests/minute per IP — prevents brute-force attacks in production.
+
+**Why Alembic?**
+Schema changes need versioning just like code. Alembic gives reversible, trackable migrations — `alembic upgrade head` / `alembic downgrade -1`.
+
+**Why Supabase + Upstash + Railway (free stack)?**
+Zero cost, production-grade infrastructure. Supabase = managed PostgreSQL, Upstash = serverless Redis, Railway = auto-deploy from GitHub.
+
+---
+
+## 🌍 Live Deployment
+
+| Service | Provider | URL |
+|---------|----------|-----|
+| API | Railway | https://saas-restapi-backend-production.up.railway.app |
+| API Docs | Railway | https://saas-restapi-backend-production.up.railway.app/docs |
+| Database | Supabase | PostgreSQL (managed, free) |
+| Cache | Upstash | Redis (managed, free) |
+
+---
+
+## 🚀 Quick Start (Local)
 
 ```bash
 # Clone
@@ -82,7 +154,7 @@ python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 
-# DB start karo
+# DB + Redis start karo
 docker run -d --name saas-db \
   -e POSTGRES_DB=taskmanager \
   -e POSTGRES_USER=user \
@@ -111,7 +183,7 @@ docker exec saas-restapi-backend-api-1 python -m alembic upgrade head
 
 ```bash
 pytest -v
-# 20 passed in 8.95s
+# 20 passed in 4.36s
 ```
 
 ---
@@ -121,7 +193,7 @@ pytest -v
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/auth/register` | Register |
-| `POST` | `/auth/login` | Login → JWT |
+| `POST` | `/auth/login` | Login → JWT (rate limited) |
 | `GET` | `/auth/me` | Current user |
 | `GET/POST` | `/projects/` | List / Create project |
 | `GET/PATCH/DELETE` | `/projects/{id}` | Project CRUD |
@@ -137,7 +209,7 @@ pytest -v
 ```text
 SaaS-RESTAPI-Backend/
 ├── app/
-│   ├── main.py              # FastAPI app, CORS, error handlers
+│   ├── main.py              # FastAPI app, CORS, rate limiter, error handlers
 │   ├── config.py            # Typed config via pydantic-settings
 │   ├── dependencies.py      # get_db(), get_current_user()
 │   ├── models/
@@ -156,7 +228,7 @@ SaaS-RESTAPI-Backend/
 │   │   ├── project.py       # Project CRUD + slug + membership
 │   │   └── task.py          # Task CRUD + filters + tags + comments
 │   └── routers/
-│       ├── auth.py          # POST /auth/register, login, refresh, me
+│       ├── auth.py          # /auth endpoints
 │       ├── projects.py      # /projects CRUD + members
 │       └── tasks.py         # /tasks CRUD + filters + comments
 ├── migrations/
@@ -164,18 +236,18 @@ SaaS-RESTAPI-Backend/
 │   └── versions/            # Migration scripts
 ├── tests/
 │   ├── conftest.py          # SQLite fixtures + async HTTP client
-│   ├── test_auth.py         # Authentication tests
-│   ├── test_projects.py     # Project API tests
-│   └── test_tasks.py        # Task API tests
+│   ├── test_auth.py         # 7 auth tests
+│   ├── test_projects.py     # 6 project tests
+│   └── test_tasks.py        # 7 task tests
 ├── .github/
 │   └── workflows/
 │       └── test.yml         # GitHub Actions CI pipeline
 ├── Dockerfile               # Multi-stage production build
 ├── docker-compose.yml       # API + PostgreSQL + Redis
-├── alembic.ini              # Alembic configuration
-├── pytest.ini               # Pytest configuration
-├── requirements.txt         # Python dependencies
-└── README.md                # Project documentation
+├── alembic.ini
+├── pytest.ini
+├── requirements.txt
+└── README.md
 ```
 
 ---
@@ -187,5 +259,5 @@ SaaS-RESTAPI-Backend/
 ---
 
 <div align="center">
-  <em>24 endpoints · 20 tests · Live on Railway · Production-ready</em>
+  <em>24 endpoints · 20 tests · Rate limited · Live on Railway · Production-ready</em>
 </div>
