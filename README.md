@@ -37,8 +37,9 @@ Most task management APIs are either too simple (no auth, no roles) or too compl
 | Database Tables | 8 |
 | Docker Services | 3 (API + PostgreSQL + Redis) |
 | Rate Limit | 5 requests/min on `/auth/login` |
-| Test Run Time | ~4 seconds |
-| Deployment | Live on Railway |
+| Avg Response Time (write) | ~285ms (bcrypt hashing included) |
+| Avg Response Time (read) | ~17ms (async SQLAlchemy + asyncpg) |
+| Test Run Time | ~4 seconds (SQLite in-memory) | |
 
 ---
 
