@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
     environment: str = "development"
+    resend_api_key: str = ""
+    from_email: str = "onboarding@resend.dev"
 
     @property
     def is_production(self) -> bool:

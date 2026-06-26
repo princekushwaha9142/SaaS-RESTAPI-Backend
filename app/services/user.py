@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.services.auth import hash_password
+from app.services.email import send_welcome_email
 
 
 async def get_by_id(db: AsyncSession, user_id: UUID) -> User:
@@ -40,6 +41,9 @@ async def create_user(db: AsyncSession, data: UserCreate) -> User:
     db.add(user)
     await db.commit()
     await db.refresh(user)
+
+    await send_welcome_email(user.email, user.full_name)
+
     return user
 
 
