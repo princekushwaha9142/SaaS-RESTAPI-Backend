@@ -1,4 +1,4 @@
-# SaaS-RESTAPI-Backend 🚀
+# SaaS-RESTAPI-Backend 
 
 ![CI](https://github.com/princekushwaha9142/SaaS-RESTAPI-Backend/actions/workflows/test.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
@@ -9,7 +9,7 @@
 ![Tests](https://img.shields.io/badge/Tests-20%20passed-brightgreen?logo=pytest)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-> Production-grade **Task & Project Management REST API** — built with FastAPI, PostgreSQL (async), JWT auth, Redis, and Docker.
+> Production-grade **Task & Project Management REST API** — built with FastAPI, PostgreSQL (async), JWT auth, Redis, Email notifications, and Docker.
 
 🔗 **Live API:** [saas-restapi-backend-production.up.railway.app/docs](https://saas-restapi-backend-production.up.railway.app/docs)
 
@@ -23,6 +23,7 @@ Most task management APIs are either too simple (no auth, no roles) or too compl
 - JWT with refresh tokens (not just basic auth)
 - Role-based access control on every endpoint
 - Rate limiting to prevent abuse
+- Email notifications for key events
 - Automated tests with isolated test database
 - Fully containerized and deployed
 
@@ -39,7 +40,10 @@ Most task management APIs are either too simple (no auth, no roles) or too compl
 | Rate Limit | 5 requests/min on `/auth/login` |
 | Avg Response Time (write) | ~285ms (bcrypt hashing included) |
 | Avg Response Time (read) | ~17ms (async SQLAlchemy + asyncpg) |
-| Test Run Time | ~4 seconds (SQLite in-memory) | |
+| Test Run Time | ~4 seconds (SQLite in-memory) |
+| Email Provider | Resend (3000 emails/month free) |
+| Deployment | Live on Railway + Supabase + Upstash |
+| Infrastructure Cost | $0/month |
 
 ---
 
@@ -74,6 +78,12 @@ Most task management APIs are either too simple (no auth, no roles) or too compl
 - Add comments to any task
 - Reply to comments (parent-child threading via `parent_id`)
 
+### 📧 Email Notifications
+- Welcome email on successful registration
+- Task assigned notification to assignee
+- Project member added notification
+- Powered by **Resend** (3000 emails/month free tier)
+
 ### 🧪 Testing
 - 20 automated tests covering auth, projects, tasks
 - Isolated SQLite test database — no Docker needed to run tests
@@ -98,6 +108,7 @@ Most task management APIs are either too simple (no auth, no roles) or too compl
 | Auth | python-jose + passlib/bcrypt |
 | Cache | Redis 7 (Upstash) |
 | Rate Limiting | SlowAPI |
+| Email | Resend |
 | Testing | pytest + httpx + aiosqlite |
 | Containerization | Docker + docker-compose |
 | Hosted DB | Supabase (PostgreSQL) |
@@ -124,6 +135,9 @@ Short-lived access tokens (30 min) limit exposure if stolen. Refresh tokens (7 d
 **Why Redis + Rate Limiting?**
 Redis enables rate limiting on auth endpoints. Login is limited to 5 requests/minute per IP — prevents brute-force attacks in production.
 
+**Why Resend for emails?**
+Resend has a simple API, 3000 free emails/month, and reliable delivery. Email failures are silently caught so they never break the main API flow.
+
 **Why Alembic?**
 Schema changes need versioning just like code. Alembic gives reversible, trackable migrations — `alembic upgrade head` / `alembic downgrade -1`.
 
@@ -140,6 +154,7 @@ Zero cost, production-grade infrastructure. Supabase = managed PostgreSQL, Upsta
 | API Docs | Railway | https://saas-restapi-backend-production.up.railway.app/docs |
 | Database | Supabase | PostgreSQL (managed, free) |
 | Cache | Upstash | Redis (managed, free) |
+| Email | Resend | 3000 emails/month (free) |
 
 ---
 
@@ -154,6 +169,7 @@ cd SaaS-RESTAPI-Backend
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
+# .env me apne values daalo
 
 # DB + Redis start karo
 docker run -d --name saas-db \
@@ -193,15 +209,31 @@ pytest -v
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/auth/register` | Register |
+| `POST` | `/auth/register` | Register + welcome email |
 | `POST` | `/auth/login` | Login → JWT (rate limited) |
 | `GET` | `/auth/me` | Current user |
 | `GET/POST` | `/projects/` | List / Create project |
 | `GET/PATCH/DELETE` | `/projects/{id}` | Project CRUD |
-| `POST/DELETE` | `/projects/{id}/members` | Membership |
+| `POST/DELETE` | `/projects/{id}/members` | Membership + email notification |
 | `GET/POST` | `/projects/{id}/tasks` | List / Create task |
-| `GET/PATCH/DELETE` | `/tasks/{id}` | Task CRUD |
+| `GET/PATCH/DELETE` | `/tasks/{id}` | Task CRUD + assignment email |
 | `GET/POST` | `/tasks/{id}/comments` | Comments |
+
+---
+
+## ⚙️ Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | ✅ | PostgreSQL async URL |
+| `REDIS_URL` | ✅ | Redis connection URL |
+| `SECRET_KEY` | ✅ | JWT signing secret |
+| `ALGORITHM` | ❌ | JWT algorithm (default: HS256) |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | ❌ | Default: 30 |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | ❌ | Default: 7 |
+| `ENVIRONMENT` | ❌ | development / production |
+| `RESEND_API_KEY` | ❌ | Resend API key for emails |
+| `FROM_EMAIL` | ❌ | Sender email address |
 
 ---
 
@@ -226,6 +258,7 @@ SaaS-RESTAPI-Backend/
 │   ├── services/
 │   │   ├── auth.py          # JWT create/decode, bcrypt hashing
 │   │   ├── user.py          # User DB operations
+│   │   ├── email.py         # Resend email notifications
 │   │   ├── project.py       # Project CRUD + slug + membership
 │   │   └── task.py          # Task CRUD + filters + tags + comments
 │   └── routers/
@@ -260,5 +293,5 @@ SaaS-RESTAPI-Backend/
 ---
 
 <div align="center">
-  <em>24 endpoints · 20 tests · Rate limited · Live on Railway · Production-ready</em>
+  <em>24 endpoints · 20 tests · Email notifications · Rate limited · Live on Railway · Production-ready</em>
 </div>
