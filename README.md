@@ -11,7 +11,7 @@
 
 > Production-grade **Task & Project Management REST API** — built with FastAPI, PostgreSQL (async), JWT auth, Redis, Email notifications, and Docker.
 
-🔗 **Live API:** [saas-restapi-backend-production.up.railway.app/docs](https://saas-restapi-backend-production.up.railway.app/docs)
+🔗 **Live API:** [saas-restapi-backend.onrender.com/docs](https://saas-restapi-backend.onrender.com/docs)
 
 ---
 
@@ -42,7 +42,7 @@ Most task management APIs are either too simple (no auth, no roles) or too compl
 | Avg Response Time (read) | ~17ms (async SQLAlchemy + asyncpg) |
 | Test Run Time | ~4 seconds (SQLite in-memory) |
 | Email Provider | Resend (3000 emails/month free) |
-| Deployment | Live on Railway + Supabase + Upstash |
+| Deployment | Live on Remder + Supabase + Upstash |
 | Infrastructure Cost | $0/month |
 
 ---
@@ -113,7 +113,7 @@ Most task management APIs are either too simple (no auth, no roles) or too compl
 | Containerization | Docker + docker-compose |
 | Hosted DB | Supabase (PostgreSQL) |
 | Hosted Cache | Upstash (Redis) |
-| Deploy | Railway |
+| Deploy | Render |
 | CI/CD | GitHub Actions |
 
 ---
@@ -141,8 +141,8 @@ Resend has a simple API, 3000 free emails/month, and reliable delivery. Email fa
 **Why Alembic?**
 Schema changes need versioning just like code. Alembic gives reversible, trackable migrations — `alembic upgrade head` / `alembic downgrade -1`.
 
-**Why Supabase + Upstash + Railway (free stack)?**
-Zero cost, production-grade infrastructure. Supabase = managed PostgreSQL, Upstash = serverless Redis, Railway = auto-deploy from GitHub.
+**Why Supabase + Upstash + Render (free stack)?**
+Zero cost, production-grade infrastructure. Supabase = managed PostgreSQL, Upstash = serverless Redis, Render = auto-deploy from GitHub.
 
 ---
 
@@ -150,8 +150,8 @@ Zero cost, production-grade infrastructure. Supabase = managed PostgreSQL, Upsta
 
 | Service | Provider | URL |
 |---------|----------|-----|
-| API | Railway | https://saas-restapi-backend-production.up.railway.app |
-| API Docs | Railway | https://saas-restapi-backend-production.up.railway.app/docs |
+| API | Render | https://saas-restapi-backend.onrender.app |
+| API Docs | Render | https://saas-restapi-backend.onrender.com/docs |
 | Database | Supabase | PostgreSQL (managed, free) |
 | Cache | Upstash | Redis (managed, free) |
 | Email | Resend | 3000 emails/month (free) |
