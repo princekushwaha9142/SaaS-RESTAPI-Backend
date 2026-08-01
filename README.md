@@ -42,7 +42,7 @@ Most task management APIs are either too simple (no auth, no roles) or too compl
 | Avg Response Time (read) | ~17ms (async SQLAlchemy + asyncpg) |
 | Test Run Time | ~4 seconds (SQLite in-memory) |
 | Email Provider | Resend (3000 emails/month free) |
-| Deployment | Live on Remder + Supabase + Upstash |
+| Deployment | Live on Render + Supabase + Upstash |
 | Infrastructure Cost | $0/month |
 
 ---
