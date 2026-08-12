@@ -293,5 +293,5 @@ SaaS-RESTAPI-Backend/
 ---
 
 <div align="center">
-  <em>24 endpoints · 20 tests · Email notifications · Rate limited · Live on Railway · Production-ready</em>
+  <em>24 endpoints · 20 tests · Email notifications · Rate limited · Live on Render · Production-ready</em>
 </div>
